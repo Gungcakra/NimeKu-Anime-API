@@ -3,122 +3,48 @@ import { fetchPage } from "../utils/fetchPage.js";
 
 export const getHome = async (req, res) => {
   try {
-    const url = "https://hianime.to/home";
+    const url = "https://samehadaku.mba/";
     const html = await fetchPage(url);
     const $ = load(html);
 
-    const spotlight = [];
-    $(".swiper-slide").each((index, element) => {
-      const title = $(element).find(".desi-head-title").text().trim();
-      const link =
-        "https://hianime.to" +
-        $(element).find(".desi-buttons a.btn-primary").attr("href");
-      const imageSrc = $(element)
-        .find(".deslide-cover-img img")
-        .attr("data-src");
-      const description = $(element).find(".desi-description").text().trim();
-      const type = $(element).find(".scd-item").eq(0).text().trim();
-      const duration = $(element).find(".scd-item").eq(1).text().trim();
-      const releaseDate = $(element).find(".scd-item.m-hide").text().trim();
-      const quality = $(element).find(".scd-item .quality").text().trim();
-      const subCount = $(element).find(".tick-item.tick-sub").text().trim();
-      const dubCount = $(element).find(".tick-item.tick-dub").text().trim();
-      const episodeCount = $(element).find(".tick-item.tick-eps").text().trim();
+    const newUpdate = [];
+    $(
+      'li[itemscope="itemscope"][itemtype="http://schema.org/CreativeWork"]'
+    ).each((index, element) => {
+      const title = $(element).find(".entry-title a").text().trim();
+      const link = $(element).find(".entry-title a").attr("href");
+      const imageSrc = $(element).find(".thumb img").attr("src");
+      const episode = $(element)
+        .find('.dtla span b:contains("Episode")')
+        .next("author")
+        .text()
+        .trim();
+      const postedBy = $(element)
+        .find('.dtla span[itemprop="author"] author')
+        .text()
+        .trim();
+      const releasedOn = $(element)
+        .find('.dtla span:contains("Released on")')
+        .text()
+        .replace("Released on:", "")
+        .trim();
 
-      spotlight.push({
+      newUpdate.push({
         title,
         link,
         imageSrc,
-        description,
-        type,
-        duration,
-        releaseDate,
-        quality,
-        subCount,
-        dubCount,
-        episodeCount,
+        episode,
+        postedBy,
+        releasedOn,
       });
     });
 
-    const filteredSpotlight = spotlight.filter(
-      (item) => item.title && item.link && item.imageSrc
-    );
-
-    const trending = [];
-    $(".block_area_trending .swiper-slide").each((index, element) => {
-      const rank = $(element).find(".number span").text().trim();
-      const title = $(element).find(".film-title").text().trim();
-      const link =
-        "https://hianime.to" + $(element).find("a.film-poster").attr("href");
-      const imageSrc = $(element).find(".film-poster-img").attr("data-src");
-
-      trending.push({
-        rank,
-        title,
-        link,
-        imageSrc,
-      });
-    });
-
-    const latest = [];
-    const newOn = [];
-    const topUpcoming = [];
-
-    $(".film_list-wrap .flw-item").each((index, element) => {
-      const title = $(element).find(".film-name a").text().trim();
-      const link =
-        "https://hianime.to" +
-        $(element).find(".film-poster-ahref").attr("href");
-      const imageSrc = $(element).find(".film-poster-img").attr("data-src");
-      const type = $(element).find(".fdi-item").eq(0).text().trim();
-      const duration = $(element).find(".fdi-duration").text().trim();
-      const subCount = $(element).find(".tick-item.tick-sub").text().trim();
-      const dubCount = $(element).find(".tick-item.tick-dub").text().trim();
-      const episodeCount = $(element).find(".tick-item.tick-eps").text().trim();
-
-      const item = {
-        title,
-        link,
-        imageSrc,
-        type,
-        duration,
-        subCount,
-        dubCount,
-        episodeCount,
-      };
-
-      if (index < 12) {
-        latest.push(item);
-      } else if (index < 24) {
-        newOn.push(item);
-      } else {
-        topUpcoming.push(item);
-      }
-    });
-
-    const filteredLatest = latest.filter(
-      (item) => item.title && item.link && item.imageSrc
-    );
-    const filteredNewOn = newOn.filter(
-      (item) => item.title && item.link && item.imageSrc
-    );
-    const filteredTopUpcoming = topUpcoming.filter(
-      (item) => item.title && item.link && item.imageSrc
-    );
-
-    res.json({
-      spotlight: filteredSpotlight,
-      trending,
-      latest: filteredLatest,
-      newOn: filteredNewOn,
-      topUpcoming: filteredTopUpcoming,
-    });
+    res.json({ newUpdate });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error occurred while scraping data");
   }
 };
-
 
 export const getGenres = async (req, res) => {
   try {
@@ -209,7 +135,7 @@ export const getGenreIdPage = async (req, res) => {
       const pageText = $(element).text().trim().toLowerCase();
 
       if (pageText !== "« sebelumnya" && pageText !== "berikutnya »") {
-        const pageUrl = "hia" +  $(element).attr("href");
+        const pageUrl = "hia" + $(element).attr("href");
         const pageNumber = $(element).text();
         pagination.push({ pageUrl, pageNumber });
       }
@@ -233,7 +159,9 @@ export const getSearch = async (req, res) => {
 
     $(".flw-item").each((index, element) => {
       const title = $(element).find(".film-name a").text().trim();
-      const link = "https://hianime.to" + $(element).find(".film-poster-ahref").attr("href");
+      const link =
+        "https://hianime.to" +
+        $(element).find(".film-poster-ahref").attr("href");
       const imageSrc = $(element).find(".film-poster-img").attr("data-src");
       const type = $(element).find(".fdi-item").eq(0).text().trim();
       const duration = $(element).find(".fdi-duration").text().trim();
@@ -276,7 +204,9 @@ export const getSearchPage = async (req, res) => {
 
     $(".flw-item").each((index, element) => {
       const title = $(element).find(".film-name a").text().trim();
-      const link = "https://hianime.to" + $(element).find(".film-poster-ahref").attr("href");
+      const link =
+        "https://hianime.to" +
+        $(element).find(".film-poster-ahref").attr("href");
       const imageSrc = $(element).find(".film-poster-img").attr("data-src");
       const type = $(element).find(".fdi-item").eq(0).text().trim();
       const duration = $(element).find(".fdi-duration").text().trim();
@@ -319,13 +249,19 @@ export const getAnimeDetail = async (req, res) => {
     const title = $(".film-name.dynamic-name").text().trim();
     const imageSrc = $(".anisc-poster .film-poster-img").attr("src");
     const description = $(".film-description .text").text().trim();
-    const japaneseTitle = $(".item-title:contains('Japanese:') .name").text().trim();
+    const japaneseTitle = $(".item-title:contains('Japanese:') .name")
+      .text()
+      .trim();
     const synonyms = $(".item-title:contains('Synonyms:') .name").text().trim();
     const aired = $(".item-title:contains('Aired:') .name").text().trim();
-    const premiered = $(".item-title:contains('Premiered:') .name").text().trim();
+    const premiered = $(".item-title:contains('Premiered:') .name")
+      .text()
+      .trim();
     const duration = $(".item-title:contains('Duration:') .name").text().trim();
     const status = $(".item-title:contains('Status:') .name").text().trim();
-    const malScore = $(".item-title:contains('MAL Score:') .name").text().trim();
+    const malScore = $(".item-title:contains('MAL Score:') .name")
+      .text()
+      .trim();
     const watchUrl = "https://hianime.to" + $(".btn-play").attr("href");
     const genres = [];
     $(".item-list:contains('Genres:') a").each((index, element) => {
@@ -364,63 +300,37 @@ export const getAnimeDetail = async (req, res) => {
   }
 };
 
-
-
-export const getChapter = async (req, res) => {
-  const { chapterId } = req.params;
-  const url = `https://komikstation.co/${chapterId}`;
+export const getEpisode = async (req, res) => {
+  const { episodeId } = req.params;
+  const url = `https://hianime.to/watch/${episodeId}`;
 
   try {
     const html = await fetchPage(url);
     const $ = load(html);
 
-    const title = $("h1.entry-title").text().trim();
-    const manhwaLink = $(".ts-breadcrumb ol li").eq(1).find("a").attr("href");
-    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    await delay(250);
+    const videoSrc = $("video.jw-video").attr("src");
 
-    const scriptContent = $("script")
-      .filter((i, el) => {
-        return $(el).html().includes("ts_reader.run");
-      })
-      .html();
+    const episodes = [];
+    $(".ss-list .ssl-item").each((index, element) => {
+      const title = $(element).find(".ep-name").text().trim();
+      const episodeLink = "https://hianime.to" + $(element).attr("href");
+      const episodeNumber = $(element).data("number");
 
-    const jsonString = scriptContent.match(/ts_reader\.run\((.*?)\);/)[1];
-    const jsonObject = JSON.parse(jsonString);
-
-    const images = jsonObject.sources[0].images;
-
-    const prevChapter = jsonObject.prevUrl || null;
-    const nextChapter = jsonObject.nextUrl || null;
-
-    const chapters = [];
-    $(".nvx #chapter option").each((index, element) => {
-      const chapterTitle = $(element).text().trim();
-      const chapterUrl = $(element).attr("value") || null;
-
-      chapters.push({
-        title: chapterTitle,
-        url: chapterUrl,
+      episodes.push({
+        title,
+        episodeLink,
+        episodeNumber,
       });
     });
 
-    const prevButtonUrl = $(".ch-prev-btn").attr("href") || null;
-    const nextButtonUrl = $(".ch-next-btn").attr("href") || null;
-
     res.json({
-      title,
-      manhwaLink,
-      images,
-      prevChapter,
-      nextChapter,
-      chapters,
-      prevButtonUrl,
-      nextButtonUrl,
+      videoSrc,
+      episodes,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to fetch chapter data" });
+    res.status(500).json({ error: "Failed to fetch episode data" });
   }
 };
-

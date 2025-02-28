@@ -7,7 +7,7 @@ import {
   getSearch,
   getSearchPage,
   getAnimeDetail,
-  getChapter
+  getEpisode
 } from "../controllers/scrapingController.js";
 
 const router = express.Router();
@@ -19,6 +19,6 @@ router.get("/genre/:genreId/page/:pageNumber", getGenreIdPage);
 router.get("/search/:searchId", getSearch);
 router.get("/search/:searchId/page/:pageNumber", getSearchPage);
 router.get("/detail/:animeId", getAnimeDetail);
-router.get("/chapter/:chapterId", getChapter); 
+router.get("/watch/:episodeId", getEpisode); 
 
 export default router;
