@@ -308,99 +308,56 @@ export const getSearchPage = async (req, res) => {
   }
 };
 
-export const getManhwaDetail = async (req, res) => {
-  const manhwaId = req.params.manhwaId;
-  const url = `https://komikstation.co/manga/${manhwaId}`;
+export const getAnimeDetail = async (req, res) => {
+  const { animeId } = req.params;
+  const url = `https://hianime.to/${animeId}`;
 
   try {
     const html = await fetchPage(url);
     const $ = load(html);
 
-    const title = $(".infox .entry-title").text().trim();
-    const alternative = $(".wd-full span").text().trim();
-    const imageSrc = $(".thumb img").attr("src");
-    const rating = $(".rating .num").text().trim();
-    const followedBy = $(".bmc").text().trim();
-
-    const synopsis = $(".entry-content.entry-content-single").text().trim();
-
-    const firstChapterLink = $(".lastend .inepcx")
-      .first()
-      .find("a")
-      .attr("href");
-    const firstChapterTitle = $(".lastend .inepcx")
-      .first()
-      .find(".epcurfirst")
-      .text()
-      .trim();
-    const latestChapterLink = $(".lastend .inepcx")
-      .last()
-      .find("a")
-      .attr("href");
-    const latestChapterTitle = $(".lastend .inepcx")
-      .last()
-      .find(".epcurlast")
-      .text()
-      .trim();
-
-    const status = $(".tsinfo .imptdt").eq(0).find("i").text().trim();
-    const type = $(".tsinfo .imptdt").eq(1).find("a").text().trim();
-    const released = $(".fmed").eq(0).find("span").text().trim();
-    const author = $(".fmed").eq(1).find("span").text().trim();
-    const artist = $(".fmed").eq(2).find("span").text().trim();
-    const updatedOn = $(".fmed").find("span time").text().trim();
-
+    const title = $(".film-name.dynamic-name").text().trim();
+    const imageSrc = $(".anisc-poster .film-poster-img").attr("src");
+    const description = $(".film-description .text").text().trim();
+    const japaneseTitle = $(".item-title:contains('Japanese:') .name").text().trim();
+    const synonyms = $(".item-title:contains('Synonyms:') .name").text().trim();
+    const aired = $(".item-title:contains('Aired:') .name").text().trim();
+    const premiered = $(".item-title:contains('Premiered:') .name").text().trim();
+    const duration = $(".item-title:contains('Duration:') .name").text().trim();
+    const status = $(".item-title:contains('Status:') .name").text().trim();
+    const malScore = $(".item-title:contains('MAL Score:') .name").text().trim();
+    const watchUrl = "https://hianime.to" + $(".btn-play").attr("href");
     const genres = [];
-    $(".mgen a").each((index, element) => {
-      const genreName = $(element).text().trim();
-      const genreLink = $(element).attr("href");
-      genres.push({
-        genreName,
-        genreLink,
-      });
+    $(".item-list:contains('Genres:') a").each((index, element) => {
+      genres.push($(element).text().trim());
+    });
+    const studios = [];
+    $(".item-title:contains('Studios:') a").each((index, element) => {
+      studios.push($(element).text().trim());
+    });
+    const producers = [];
+    $(".item-title:contains('Producers:') a").each((index, element) => {
+      producers.push($(element).text().trim());
     });
 
-    const chapters = [];
-    $("#chapterlist li").each((index, element) => {
-      const chapterNum = $(element).find(".chapternum").text().trim();
-      const chapterLink = $(element).find(".eph-num a").attr("href");
-      const chapterDate = $(element).find(".chapterdate").text().trim();
-      const downloadLink = $(element).find(".dload").attr("href");
-
-      chapters.push({
-        chapterNum,
-        chapterLink,
-        chapterDate,
-        downloadLink,
-      });
-    });
-
-    const manhwaDetails = {
+    const animeDetails = {
       title,
-      alternative,
       imageSrc,
-      rating,
-      followedBy,
-      synopsis,
-      firstChapter: {
-        title: firstChapterTitle,
-        link: firstChapterLink,
-      },
-      latestChapter: {
-        title: latestChapterTitle,
-        link: latestChapterLink,
-      },
+      description,
+      japaneseTitle,
+      synonyms,
+      aired,
+      premiered,
+      duration,
       status,
-      type,
-      released,
-      author,
-      artist,
-      updatedOn,
+      malScore,
+      watchUrl,
       genres,
-      chapters,
+      studios,
+      producers,
     };
 
-    res.json(manhwaDetails);
+    res.json(animeDetails);
   } catch (error) {
     console.error(error);
     res.status(500).send("Error occurred while scraping data");

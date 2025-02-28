@@ -6,7 +6,7 @@ import {
   getGenreIdPage,
   getSearch,
   getSearchPage,
-  getManhwaDetail,
+  getAnimeDetail,
   getChapter
 } from "../controllers/scrapingController.js";
 
@@ -18,7 +18,7 @@ router.get("/genre/:genreId", getGenreId);
 router.get("/genre/:genreId/page/:pageNumber", getGenreIdPage);
 router.get("/search/:searchId", getSearch);
 router.get("/search/:searchId/page/:pageNumber", getSearchPage);
-router.get("/manhwa-detail/:manhwaId", getManhwaDetail);
+router.get("/detail/:animeId", getAnimeDetail);
 router.get("/chapter/:chapterId", getChapter); 
 
 export default router;
