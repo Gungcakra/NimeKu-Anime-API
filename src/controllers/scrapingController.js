@@ -1,5 +1,6 @@
 import { load } from "cheerio";
 import { fetchPage, postPage } from "../utils/fetchPage.js";
+import { extractIframeSrc } from "../utils/helper.js";
 
 export const getNew = async (req, res) => {
   try {
@@ -300,98 +301,79 @@ export const getAZList = async (req, res) => {
 
 export const getGenres = async (req, res) => {
   try {
-    const url = "https://komikstation.co/manga/list-mode/";
+    const url = "https://samehadaku.mba/daftar-anime-2";
     const html = await fetchPage(url);
     const $ = load(html);
 
-    const genres = [];
-
-    $(".dropdown-menu.c4.genrez li").each((index, element) => {
-      const genreLabel = $(element).find("label").text().trim();
-      const genreValue = $(element).find("input").val();
-
-      if (genreLabel && genreValue) {
-        genres.push({ label: genreLabel, value: genreValue });
-      }
+    const genreList = [];
+    const genreElements = $(".filter_act.genres .tax_fil").toArray();
+    genreElements.forEach((genreElement) => {
+      const oriUrl = `https://samehadaku.mba/genre/${$(genreElement).find("input").attr("value")}`;
+      const title = $(genreElement).text().trim();
+      const url = oriUrl;
+      const genreId = oriUrl.split("/").pop();
+      const href = `/genres/${genreId}`;
+      genreList.push({
+        title,
+        genreId,
+        href,
+        url,
+      });
     });
 
-    res.json({ genres });
+    res.json({ genreList });
   } catch (error) {
     console.error("Error fetching data:", error.message);
     res.status(500).json({ error: "Failed to fetch data" });
   }
 };
 
-export const getGenreId = async (req, res) => {
+export const getAnimeByGenre = async (req, res) => {
   const { genreId } = req.params;
-  const url = `https://komikstation.co/genres/${genreId}`;
+  const url = `https://samehadaku.mba/genre/${genreId}`;
 
   try {
     const html = await fetchPage(url);
     const $ = load(html);
     const seriesList = [];
 
-    $(".bs").each((index, element) => {
+    $("article.animpost").each((index, element) => {
       const series = {};
-      const bsx = $(element).find(".bsx");
+      const animposx = $(element).find(".animposx");
 
-      series.title = bsx.find("a").attr("title");
-      series.url = bsx.find("a").attr("href");
-      series.image = bsx.find("img").attr("src");
-      series.latestChapter = bsx.find(".epxs").text();
-      series.rating = bsx.find(".numscore").text();
+      series.title = animposx.find("a").attr("title");
+      series.url = animposx.find("a").attr("href");
+      series.image = animposx.find("img").attr("src");
+      series.type = animposx.find(".type").first().text().trim();
+      series.score = animposx.find(".score").text().trim();
+      series.status = animposx.find(".data .type").text().trim();
+      series.views = $(element).find(".metadata span").eq(2).text().trim();
+      series.description = $(element).find(".ttls").text().trim();
+      series.genres = [];
+      $(element)
+        .find(".genres .mta a")
+        .each((i, el) => {
+          series.genres.push($(el).text().trim());
+        });
 
       seriesList.push(series);
     });
 
     const pagination = [];
-    $(".pagination a.page-numbers").each((index, element) => {
-      const pageUrl = $(element).attr("href");
-      const pageNumber = $(element).text();
-      pagination.push({ pageUrl, pageNumber });
-    });
-
-    const nextPage = $(".pagination a.next.page-numbers").attr("href");
-
-    res.json({ seriesList, pagination, nextPage });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching data" });
-  }
-};
-
-export const getGenreIdPage = async (req, res) => {
-  const { genreId, pageNumber } = req.params;
-  const url = `https://komikstation.co/genres/${genreId}/page/${pageNumber}`;
-
-  try {
-    const html = await fetchPage(url);
-    const $ = load(html);
-    const seriesList = [];
-
-    $(".bs").each((index, element) => {
-      const series = {};
-      const bsx = $(element).find(".bsx");
-
-      series.title = bsx.find("a").attr("title");
-      series.url = bsx.find("a").attr("href");
-      series.image = bsx.find("img").attr("src");
-      series.latestChapter = bsx.find(".epxs").text();
-      series.rating = bsx.find(".numscore").text();
-
-      seriesList.push(series);
-    });
-
-    const pagination = [];
-    $(".pagination a.page-numbers").each((index, element) => {
-      const pageText = $(element).text().trim().toLowerCase();
-
-      if (pageText !== "« sebelumnya" && pageText !== "berikutnya »") {
-        const pageUrl = "hia" + $(element).attr("href");
-        const pageNumber = $(element).text();
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
+      (index, element) => {
+        const pageUrl = $(element).attr("href");
+        const pageNumber =
+          $(element).text().trim() || $(element).attr("aria-label") || "Next";
         pagination.push({ pageUrl, pageNumber });
       }
-    });
+    );
+    const currentPage = $(".pagination .current").text().trim();
+    const totalPages = $(".pagination span")
+      .first()
+      .text()
+      .match(/Page \d+ of (\d+)/)[1];
+    pagination.unshift({ currentPage, totalPages });
 
     res.json({ seriesList, pagination });
   } catch (error) {
@@ -399,6 +381,61 @@ export const getGenreIdPage = async (req, res) => {
     res.status(500).json({ message: "Error fetching data" });
   }
 };
+export const getAnimeByGenrePage = async (req, res) => {
+  const { genreId } = req.params;
+  const { pageNumber } = req.params;
+  const url = `https://samehadaku.mba/genre/${genreId}/page/${pageNumber}`;
+
+  try {
+    const html = await fetchPage(url);
+    const $ = load(html);
+    const seriesList = [];
+
+    $("article.animpost").each((index, element) => {
+      const series = {};
+      const animposx = $(element).find(".animposx");
+
+      series.title = animposx.find("a").attr("title");
+      series.url = animposx.find("a").attr("href");
+      series.image = animposx.find("img").attr("src");
+      series.type = animposx.find(".type").first().text().trim();
+      series.score = animposx.find(".score").text().trim();
+      series.status = animposx.find(".data .type").text().trim();
+      series.views = $(element).find(".metadata span").eq(2).text().trim();
+      series.description = $(element).find(".ttls").text().trim();
+      series.genres = [];
+      $(element)
+        .find(".genres .mta a")
+        .each((i, el) => {
+          series.genres.push($(el).text().trim());
+        });
+
+      seriesList.push(series);
+    });
+
+    const pagination = [];
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
+      (index, element) => {
+        const pageUrl = $(element).attr("href");
+        const pageNumber =
+          $(element).text().trim() || $(element).attr("aria-label") || "Next";
+        pagination.push({ pageUrl, pageNumber });
+      }
+    );
+    const currentPage = $(".pagination .current").text().trim();
+    const totalPages = $(".pagination span")
+      .first()
+      .text()
+      .match(/Page \d+ of (\d+)/)[1];
+    pagination.unshift({ currentPage, totalPages });
+
+    res.json({ seriesList, pagination });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching data" });
+  }
+};
+
 
 export const getSearch = async (req, res) => {
   const { keyword } = req.params;
@@ -630,54 +667,116 @@ export const getEpisode = async (req, res) => {
       });
     });
 
+    const dataDetail = {
+      title: $(".entry-title[itemprop='partOfSeries']").text().trim(),
+      imageSrc: $(".thumb img").attr("src"),
+      description: $(".entry-content.entry-content-single[itemprop='description']").text().trim(),
+      relatedSeason: [],
+      genres: [],
+    };
+    
+    
+    $(".entry-content.entry-content-single ol li a").each((index, element) => {
+      dataDetail.relatedSeason.push({
+        name: $(element).text().trim(),
+        url: $(element).attr("href"),
+      });
+    });
+    
+    
+    $(".genre-info a").each((index, element) => {
+      dataDetail.genres.push({
+        name: $(element).text().trim(),
+        url: $(element).attr("href"),
+      });
+    });
+
     const previousEpisode = $(".naveps .nvs a").first().attr("href");
     const allEpisode = $(".naveps .nvsc a").attr("href");
     const nextEpisode = $(".naveps .nvs a").last().attr("href");
+
+    const serverLinks = [];
+    $(".server_option .east_player_option").each((index, element) => {
+      const postData = $(element).attr("data-post");
+      const numeData = $(element).attr("data-nume");
+      const typeData = $(element).attr("data-type");
+      const quality = $(element).find("span").text().trim();
+      const server = `${postData}-${numeData}-${typeData}`;
+      serverLinks.push({ quality, server });
+    });
 
     const el = $(".east_player_option").first();
     const postData = el.attr("data-post");
     const numeData = el.attr("data-nume");
     const typeData = el.attr("data-type");
-    
-    let defaultIframe = "";
+
+    let defaultVideoSrc = "";
     try {
-      const response = await postPage(`${originUrl}/wp-admin/admin-ajax.php`, 
+      const response = await postPage(
+        `${originUrl}/wp-admin/admin-ajax.php`,
         new URLSearchParams({
           action: "player_ajax",
           post: postData,
           nume: numeData,
           type: typeData,
-        }), 
+        }),
         {
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           responseType: "text",
         }
       );
-      const extractIframeSrc = (html) => {
-        const match = html.match(/<iframe[^>]+src="([^"]+)"/i);
-        return match ? match[1].trim() : null;
-      };
-      
-      defaultIframe = extractIframeSrc(response);
+
+      defaultVideoSrc = extractIframeSrc(response);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-    
 
     res.json({
       title,
-      defaultIframe, 
+      dataDetail,
+      defaultVideoSrc,
       description,
       episodeNumber,
       postedTime,
       previousEpisode,
       allEpisode,
       nextEpisode,
+      serverLinks,
       relatedEpisodes,
       downloadLinks,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch episode data" });
+  }
+};
+
+export const getStreamLink = async (req, res) => {
+  const { streamId } = req.params;
+  const originUrl = "https://samehadaku.mba";
+
+  try {
+    const postData = streamId.split("-")[0];
+    const numeData = streamId.split("-")[1];
+    const typeData = streamId.split("-")[2];
+    const response = await postPage(
+      `${originUrl}/wp-admin/admin-ajax.php`,
+      new URLSearchParams({
+        action: "player_ajax",
+        post: postData,
+        nume: numeData,
+        type: typeData,
+      }),
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        responseType: "text",
+      }
+    );
+
+    const videoSrc = extractIframeSrc(response);
+    res.json({ videoSrc });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({ error: "Failed to fetch stream link" });
   }
 };
