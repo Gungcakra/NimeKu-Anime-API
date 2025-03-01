@@ -210,6 +210,34 @@ export const getSchedule = async (req, res) => {
   }
 };
 
+export const getAZList = async (req, res) => {
+  try {
+    const url = "https://samehadaku.mba/daftar-anime-2/?list";
+    const html = await fetchPage(url);
+    const $ = load(html);
+
+    const azList = {};
+
+    $(".listbar").each((index, element) => {
+      const name = $(element).find(".listabj a").text().trim();
+      const titles = [];
+
+      $(element).find(".listttl ul li a").each((i, el) => {
+        const title = $(el).text().trim();
+        const link = $(el).attr("href");
+        titles.push({ title, link });
+      });
+
+      azList[name] = titles;
+    });
+
+    res.json(azList);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error occurred while fetching data");
+  }
+};
+
 export const getGenres = async (req, res) => {
   try {
     const url = "https://komikstation.co/manga/list-mode/";
@@ -313,92 +341,107 @@ export const getGenreIdPage = async (req, res) => {
 };
 
 export const getSearch = async (req, res) => {
-  const { searchId } = req.params;
-  const url = `https://hianime.to/search?keyword=${searchId}`;
-
+  const { keyword } = req.params;
   try {
+    const url = `https://samehadaku.mba/?s=${keyword}`;
     const html = await fetchPage(url);
     const $ = load(html);
-    const seriesList = [];
 
-    $(".flw-item").each((index, element) => {
-      const title = $(element).find(".film-name a").text().trim();
-      const link =
-        "https://hianime.to" +
-        $(element).find(".film-poster-ahref").attr("href");
-      const imageSrc = $(element).find(".film-poster-img").attr("data-src");
-      const type = $(element).find(".fdi-item").eq(0).text().trim();
-      const duration = $(element).find(".fdi-duration").text().trim();
-      const subCount = $(element).find(".tick-item.tick-sub").text().trim();
-      const episodeCount = $(element).find(".tick-item.tick-eps").text().trim();
+    const animeList = [];
+    $(".animepost").each((index, element) => {
+      const title = $(element).find(".title h2").text().trim();
+      const link = $(element).find("a").attr("href");
+      const imageSrc = $(element).find("img").attr("src");
+      const type = $(element).find(".type").first().text().trim();
+      const score = $(element).find(".score").text().trim();
+      const status = $(element).find(".data .type").text().trim();
+      const views = $(element).find(".metadata span").eq(2).text().trim();
+      const description = $(element).find(".ttls").text().trim();
+      const genres = [];
+      $(element).find(".genres .mta a").each((i, el) => {
+        genres.push($(el).text().trim());
+      });
 
-      seriesList.push({
+      animeList.push({
         title,
         link,
         imageSrc,
         type,
-        duration,
-        subCount,
-        episodeCount,
+        score,
+        status,
+        views,
+        description,
+        genres,
       });
     });
 
     const pagination = [];
-    $(".pagination a.page-link").each((index, element) => {
-      const pageUrl = "https://hianime.to" + $(element).attr("href");
-      const pageNumber = $(element).text().trim();
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each((index, element) => {
+      const pageUrl = $(element).attr("href");
+      const pageNumber = $(element).text().trim() || $(element).attr("aria-label") || "Next";
       pagination.push({ pageUrl, pageNumber });
     });
+    const currentPage = $(".pagination .current").text().trim();
+    const totalPages = $(".pagination span").first().text().match(/Page \d+ of (\d+)/)[1];
+    pagination.unshift({ currentPage, totalPages });
 
-    res.json({ seriesList, pagination });
+    res.json({ animeList, pagination });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error fetching data" });
+    res.status(500).send("Error occurred while scraping data");
   }
 };
 
 export const getSearchPage = async (req, res) => {
-  const { searchId, pageNumber } = req.params;
-  const url = `https://hianime.to/search?keyword=${searchId}&page=${pageNumber}`;
-
+  const { keyword } = req.params;
+  const { pageNumber } = req.params;
   try {
+    const url = `https://samehadaku.mba/page/${pageNumber}/?s=${keyword}`;
     const html = await fetchPage(url);
     const $ = load(html);
-    const seriesList = [];
 
-    $(".flw-item").each((index, element) => {
-      const title = $(element).find(".film-name a").text().trim();
-      const link =
-        "https://hianime.to" +
-        $(element).find(".film-poster-ahref").attr("href");
-      const imageSrc = $(element).find(".film-poster-img").attr("data-src");
-      const type = $(element).find(".fdi-item").eq(0).text().trim();
-      const duration = $(element).find(".fdi-duration").text().trim();
-      const subCount = $(element).find(".tick-item.tick-sub").text().trim();
-      const episodeCount = $(element).find(".tick-item.tick-eps").text().trim();
+    const animeList = [];
+    $(".animepost").each((index, element) => {
+      const title = $(element).find(".title h2").text().trim();
+      const link = $(element).find("a").attr("href");
+      const imageSrc = $(element).find("img").attr("src");
+      const type = $(element).find(".type").first().text().trim();
+      const score = $(element).find(".score").text().trim();
+      const status = $(element).find(".data .type").text().trim();
+      const views = $(element).find(".metadata span").eq(2).text().trim();
+      const description = $(element).find(".ttls").text().trim();
+      const genres = [];
+      $(element).find(".genres .mta a").each((i, el) => {
+        genres.push($(el).text().trim());
+      });
 
-      seriesList.push({
+      animeList.push({
         title,
         link,
         imageSrc,
         type,
-        duration,
-        subCount,
-        episodeCount,
+        score,
+        status,
+        views,
+        description,
+        genres,
       });
     });
 
     const pagination = [];
-    $(".pagination a.page-link").each((index, element) => {
-      const pageUrl = "https://hianime.to" + $(element).attr("href");
-      const pageNumber = $(element).text().trim();
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each((index, element) => {
+      const pageUrl = $(element).attr("href");
+      const pageNumber = $(element).text().trim() || $(element).attr("aria-label") || "Next";
       pagination.push({ pageUrl, pageNumber });
     });
+    const currentPage = $(".pagination .current").text().trim();
+    const totalPages = $(".pagination span").first().text().match(/Page \d+ of (\d+)/)[1];
+    pagination.unshift({ currentPage, totalPages });
 
-    res.json({ seriesList, pagination });
+    res.json({ animeList, pagination });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error fetching data" });
+    res.status(500).send("Error occurred while scraping data");
   }
 };
 
