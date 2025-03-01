@@ -1,6 +1,10 @@
 import express from "express";
 import {
-  getHome,
+  getNew,
+  getNewPage,
+  getAnimeList,
+  getAnimeListPage,
+  getSchedule,
   getGenres,
   getGenreId,
   getGenreIdPage,
@@ -12,7 +16,11 @@ import {
 
 const router = express.Router();
 
-router.get("/home", getHome);
+router.get("/new", getNew);
+router.get("/new/page/:pageNumber", getNewPage);
+router.get("/anime", getAnimeList);
+router.get("/anime/page/:pageNumber", getAnimeListPage);
+router.get("/schedule", getSchedule);
 router.get("/genres", getGenres);
 router.get("/genre/:genreId", getGenreId);
 router.get("/genre/:genreId/page/:pageNumber", getGenreIdPage);

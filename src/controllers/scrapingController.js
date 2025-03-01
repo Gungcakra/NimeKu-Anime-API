@@ -1,33 +1,20 @@
 import { load } from "cheerio";
 import { fetchPage } from "../utils/fetchPage.js";
 
-export const getHome = async (req, res) => {
+export const getNew = async (req, res) => {
   try {
-    const url = "https://samehadaku.mba/";
+    const url = "https://samehadaku.mba/anime-terbaru/";
     const html = await fetchPage(url);
     const $ = load(html);
 
     const newUpdate = [];
-    $(
-      'li[itemscope="itemscope"][itemtype="http://schema.org/CreativeWork"]'
-    ).each((index, element) => {
+    $('li[itemscope="itemscope"][itemtype="http://schema.org/CreativeWork"]').each((index, element) => {
       const title = $(element).find(".entry-title a").text().trim();
       const link = $(element).find(".entry-title a").attr("href");
       const imageSrc = $(element).find(".thumb img").attr("src");
-      const episode = $(element)
-        .find('.dtla span b:contains("Episode")')
-        .next("author")
-        .text()
-        .trim();
-      const postedBy = $(element)
-        .find('.dtla span[itemprop="author"] author')
-        .text()
-        .trim();
-      const releasedOn = $(element)
-        .find('.dtla span:contains("Released on")')
-        .text()
-        .replace("Released on:", "")
-        .trim();
+      const episode = $(element).find('.dtla span b:contains("Episode")').next("author").text().trim();
+      const postedBy = $(element).find('.dtla span[itemprop="author"] author').text().trim();
+      const releasedOn = $(element).find('.dtla span:contains("Released on")').text().replace("Released on:", "").trim();
 
       newUpdate.push({
         title,
@@ -39,10 +26,187 @@ export const getHome = async (req, res) => {
       });
     });
 
-    res.json({ newUpdate });
+    const pagination = [];
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each((index, element) => {
+      const pageUrl = $(element).attr("href");
+      const pageNumber = $(element).text().trim() || $(element).attr("aria-label") || "Next";
+      pagination.push({ pageUrl, pageNumber });
+    });
+    const currentPage = $(".pagination .current").text().trim();
+    const totalPages = $(".pagination span").first().text().match(/Page \d+ of (\d+)/)[1];
+    pagination.unshift({ currentPage, totalPages });
+
+    res.json({ newUpdate, pagination });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error occurred while scraping data");
+  }
+};
+
+export const getNewPage = async (req, res) => {
+  const { pageNumber } = req.params;
+  try {
+    const url = `https://samehadaku.mba/anime-terbaru/page/${pageNumber}`;
+    const html = await fetchPage(url);
+    const $ = load(html);
+
+    const newUpdate = [];
+    $('li[itemscope="itemscope"][itemtype="http://schema.org/CreativeWork"]').each((index, element) => {
+      const title = $(element).find(".entry-title a").text().trim();
+      const link = $(element).find(".entry-title a").attr("href");
+      const imageSrc = $(element).find(".thumb img").attr("src");
+      const episode = $(element).find('.dtla span b:contains("Episode")').next("author").text().trim();
+      const postedBy = $(element).find('.dtla span[itemprop="author"] author').text().trim();
+      const releasedOn = $(element).find('.dtla span:contains("Released on")').text().replace("Released on:", "").trim();
+
+      newUpdate.push({
+        title,
+        link,
+        imageSrc,
+        episode,
+        postedBy,
+        releasedOn,
+      });
+    });
+
+    const pagination = [];
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each((index, element) => {
+      const pageUrl = $(element).attr("href");
+      const pageNumber = $(element).text().trim() || $(element).attr("aria-label") || "Next";
+      pagination.push({ pageUrl, pageNumber });
+    });
+    const currentPage = $(".pagination .current").text().trim();
+    const totalPages = $(".pagination span").first().text().match(/Page \d+ of (\d+)/)[1];
+    pagination.unshift({ currentPage, totalPages });
+
+    res.json({ newUpdate, pagination });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error occurred while scraping data");
+  }
+};
+
+
+export const getAnimeList = async (req, res) => {
+  try {
+    const url = `https://samehadaku.mba/?s=`;
+    const html = await fetchPage(url);
+    const $ = load(html);
+
+    const animeList = [];
+    $(".animepost").each((index, element) => {
+      const title = $(element).find(".title h2").text().trim();
+      const link = $(element).find("a").attr("href");
+      const imageSrc = $(element).find("img").attr("src");
+      const type = $(element).find(".type").first().text().trim();
+      const score = $(element).find(".score").text().trim();
+      const status = $(element).find(".data .type").text().trim();
+      const views = $(element).find(".metadata span").eq(2).text().trim();
+      const description = $(element).find(".ttls").text().trim();
+      const genres = [];
+      $(element).find(".genres .mta a").each((i, el) => {
+        genres.push($(el).text().trim());
+      });
+
+      animeList.push({
+        title,
+        link,
+        imageSrc,
+        type,
+        score,
+        status,
+        views,
+        description,
+        genres,
+      });
+    });
+
+    const pagination = [];
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each((index, element) => {
+      const pageUrl = $(element).attr("href");
+      const pageNumber = $(element).text().trim() || $(element).attr("aria-label") || "Next";
+      pagination.push({ pageUrl, pageNumber });
+    });
+    const currentPage = $(".pagination .current").text().trim();
+    const totalPages = $(".pagination span").first().text().match(/Page \d+ of (\d+)/)[1];
+    pagination.unshift({ currentPage, totalPages });
+
+    res.json({ animeList, pagination });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error occurred while scraping data");
+  }
+};
+
+export const getAnimeListPage = async (req, res) => {
+  const { pageNumber } = req.params;
+  try {
+    const url = `https://samehadaku.mba/page/${pageNumber}/?s`;
+    const html = await fetchPage(url);
+    const $ = load(html);
+
+    const animeList = [];
+    $(".animepost").each((index, element) => {
+      const title = $(element).find(".title h2").text().trim();
+      const link = $(element).find("a").attr("href");
+      const imageSrc = $(element).find("img").attr("src");
+      const type = $(element).find(".type").first().text().trim();
+      const score = $(element).find(".score").text().trim();
+      const status = $(element).find(".data .type").text().trim();
+      const views = $(element).find(".metadata span").eq(2).text().trim();
+      const description = $(element).find(".ttls").text().trim();
+      const genres = [];
+      $(element).find(".genres .mta a").each((i, el) => {
+        genres.push($(el).text().trim());
+      });
+
+      animeList.push({
+        title,
+        link,
+        imageSrc,
+        type,
+        score,
+        status,
+        views,
+        description,
+        genres,
+      });
+    });
+
+    const pagination = [];
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each((index, element) => {
+      const pageUrl = $(element).attr("href");
+      const pageNumber = $(element).text().trim() || $(element).attr("aria-label") || "Next";
+      pagination.push({ pageUrl, pageNumber });
+    });
+    const currentPage = $(".pagination .current").text().trim();
+    const totalPages = $(".pagination span").first().text().match(/Page \d+ of (\d+)/)[1];
+    pagination.unshift({ currentPage, totalPages });
+
+    res.json({ animeList, pagination });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error occurred while scraping data");
+  }
+};
+
+export const getSchedule = async (req, res) => {
+  try {
+    const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    const schedule = {};
+
+    for (const day of days) {
+      const url = `https://samehadaku.mba/wp-json/custom/v1/all-schedule?day=${day}`;
+      const response = await fetchPage(url);
+      schedule[day] = response;
+      
+    }
+    res.json(schedule);
+
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error occurred while fetching data");
   }
 };
 
