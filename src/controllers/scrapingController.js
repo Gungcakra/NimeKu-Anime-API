@@ -89,7 +89,7 @@ export const getNewPage = async (req, res) => {
 
 export const getAnimeList = async (req, res) => {
   try {
-    const url = `https://samehadaku.mba/?s=`;
+    const url = `https://samehadaku.mba/daftar-anime-2/`;
     const html = await fetchPage(url);
     const $ = load(html);
 
@@ -141,7 +141,7 @@ export const getAnimeList = async (req, res) => {
 export const getAnimeListPage = async (req, res) => {
   const { pageNumber } = req.params;
   try {
-    const url = `https://samehadaku.mba/page/${pageNumber}/?s`;
+    const url = `https://samehadaku.mba/daftar-anime-2/page/${pageNumber}/`;
     const html = await fetchPage(url);
     const $ = load(html);
 
