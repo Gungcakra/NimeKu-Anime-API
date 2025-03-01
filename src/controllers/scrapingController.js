@@ -1,5 +1,5 @@
 import { load } from "cheerio";
-import { fetchPage } from "../utils/fetchPage.js";
+import { fetchPage, postPage } from "../utils/fetchPage.js";
 
 export const getNew = async (req, res) => {
   try {
@@ -8,13 +8,26 @@ export const getNew = async (req, res) => {
     const $ = load(html);
 
     const newUpdate = [];
-    $('li[itemscope="itemscope"][itemtype="http://schema.org/CreativeWork"]').each((index, element) => {
+    $(
+      'li[itemscope="itemscope"][itemtype="http://schema.org/CreativeWork"]'
+    ).each((index, element) => {
       const title = $(element).find(".entry-title a").text().trim();
       const link = $(element).find(".entry-title a").attr("href");
       const imageSrc = $(element).find(".thumb img").attr("src");
-      const episode = $(element).find('.dtla span b:contains("Episode")').next("author").text().trim();
-      const postedBy = $(element).find('.dtla span[itemprop="author"] author').text().trim();
-      const releasedOn = $(element).find('.dtla span:contains("Released on")').text().replace("Released on:", "").trim();
+      const episode = $(element)
+        .find('.dtla span b:contains("Episode")')
+        .next("author")
+        .text()
+        .trim();
+      const postedBy = $(element)
+        .find('.dtla span[itemprop="author"] author')
+        .text()
+        .trim();
+      const releasedOn = $(element)
+        .find('.dtla span:contains("Released on")')
+        .text()
+        .replace("Released on:", "")
+        .trim();
 
       newUpdate.push({
         title,
@@ -27,13 +40,19 @@ export const getNew = async (req, res) => {
     });
 
     const pagination = [];
-    $(".pagination a.page-numbers, .pagination a.arrow_pag").each((index, element) => {
-      const pageUrl = $(element).attr("href");
-      const pageNumber = $(element).text().trim() || $(element).attr("aria-label") || "Next";
-      pagination.push({ pageUrl, pageNumber });
-    });
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
+      (index, element) => {
+        const pageUrl = $(element).attr("href");
+        const pageNumber =
+          $(element).text().trim() || $(element).attr("aria-label") || "Next";
+        pagination.push({ pageUrl, pageNumber });
+      }
+    );
     const currentPage = $(".pagination .current").text().trim();
-    const totalPages = $(".pagination span").first().text().match(/Page \d+ of (\d+)/)[1];
+    const totalPages = $(".pagination span")
+      .first()
+      .text()
+      .match(/Page \d+ of (\d+)/)[1];
     pagination.unshift({ currentPage, totalPages });
 
     res.json({ newUpdate, pagination });
@@ -51,13 +70,26 @@ export const getNewPage = async (req, res) => {
     const $ = load(html);
 
     const newUpdate = [];
-    $('li[itemscope="itemscope"][itemtype="http://schema.org/CreativeWork"]').each((index, element) => {
+    $(
+      'li[itemscope="itemscope"][itemtype="http://schema.org/CreativeWork"]'
+    ).each((index, element) => {
       const title = $(element).find(".entry-title a").text().trim();
       const link = $(element).find(".entry-title a").attr("href");
       const imageSrc = $(element).find(".thumb img").attr("src");
-      const episode = $(element).find('.dtla span b:contains("Episode")').next("author").text().trim();
-      const postedBy = $(element).find('.dtla span[itemprop="author"] author').text().trim();
-      const releasedOn = $(element).find('.dtla span:contains("Released on")').text().replace("Released on:", "").trim();
+      const episode = $(element)
+        .find('.dtla span b:contains("Episode")')
+        .next("author")
+        .text()
+        .trim();
+      const postedBy = $(element)
+        .find('.dtla span[itemprop="author"] author')
+        .text()
+        .trim();
+      const releasedOn = $(element)
+        .find('.dtla span:contains("Released on")')
+        .text()
+        .replace("Released on:", "")
+        .trim();
 
       newUpdate.push({
         title,
@@ -70,13 +102,19 @@ export const getNewPage = async (req, res) => {
     });
 
     const pagination = [];
-    $(".pagination a.page-numbers, .pagination a.arrow_pag").each((index, element) => {
-      const pageUrl = $(element).attr("href");
-      const pageNumber = $(element).text().trim() || $(element).attr("aria-label") || "Next";
-      pagination.push({ pageUrl, pageNumber });
-    });
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
+      (index, element) => {
+        const pageUrl = $(element).attr("href");
+        const pageNumber =
+          $(element).text().trim() || $(element).attr("aria-label") || "Next";
+        pagination.push({ pageUrl, pageNumber });
+      }
+    );
     const currentPage = $(".pagination .current").text().trim();
-    const totalPages = $(".pagination span").first().text().match(/Page \d+ of (\d+)/)[1];
+    const totalPages = $(".pagination span")
+      .first()
+      .text()
+      .match(/Page \d+ of (\d+)/)[1];
     pagination.unshift({ currentPage, totalPages });
 
     res.json({ newUpdate, pagination });
@@ -85,7 +123,6 @@ export const getNewPage = async (req, res) => {
     res.status(500).send("Error occurred while scraping data");
   }
 };
-
 
 export const getAnimeList = async (req, res) => {
   try {
@@ -104,9 +141,11 @@ export const getAnimeList = async (req, res) => {
       const views = $(element).find(".metadata span").eq(2).text().trim();
       const description = $(element).find(".ttls").text().trim();
       const genres = [];
-      $(element).find(".genres .mta a").each((i, el) => {
-        genres.push($(el).text().trim());
-      });
+      $(element)
+        .find(".genres .mta a")
+        .each((i, el) => {
+          genres.push($(el).text().trim());
+        });
 
       animeList.push({
         title,
@@ -122,13 +161,19 @@ export const getAnimeList = async (req, res) => {
     });
 
     const pagination = [];
-    $(".pagination a.page-numbers, .pagination a.arrow_pag").each((index, element) => {
-      const pageUrl = $(element).attr("href");
-      const pageNumber = $(element).text().trim() || $(element).attr("aria-label") || "Next";
-      pagination.push({ pageUrl, pageNumber });
-    });
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
+      (index, element) => {
+        const pageUrl = $(element).attr("href");
+        const pageNumber =
+          $(element).text().trim() || $(element).attr("aria-label") || "Next";
+        pagination.push({ pageUrl, pageNumber });
+      }
+    );
     const currentPage = $(".pagination .current").text().trim();
-    const totalPages = $(".pagination span").first().text().match(/Page \d+ of (\d+)/)[1];
+    const totalPages = $(".pagination span")
+      .first()
+      .text()
+      .match(/Page \d+ of (\d+)/)[1];
     pagination.unshift({ currentPage, totalPages });
 
     res.json({ animeList, pagination });
@@ -156,9 +201,11 @@ export const getAnimeListPage = async (req, res) => {
       const views = $(element).find(".metadata span").eq(2).text().trim();
       const description = $(element).find(".ttls").text().trim();
       const genres = [];
-      $(element).find(".genres .mta a").each((i, el) => {
-        genres.push($(el).text().trim());
-      });
+      $(element)
+        .find(".genres .mta a")
+        .each((i, el) => {
+          genres.push($(el).text().trim());
+        });
 
       animeList.push({
         title,
@@ -174,13 +221,19 @@ export const getAnimeListPage = async (req, res) => {
     });
 
     const pagination = [];
-    $(".pagination a.page-numbers, .pagination a.arrow_pag").each((index, element) => {
-      const pageUrl = $(element).attr("href");
-      const pageNumber = $(element).text().trim() || $(element).attr("aria-label") || "Next";
-      pagination.push({ pageUrl, pageNumber });
-    });
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
+      (index, element) => {
+        const pageUrl = $(element).attr("href");
+        const pageNumber =
+          $(element).text().trim() || $(element).attr("aria-label") || "Next";
+        pagination.push({ pageUrl, pageNumber });
+      }
+    );
     const currentPage = $(".pagination .current").text().trim();
-    const totalPages = $(".pagination span").first().text().match(/Page \d+ of (\d+)/)[1];
+    const totalPages = $(".pagination span")
+      .first()
+      .text()
+      .match(/Page \d+ of (\d+)/)[1];
     pagination.unshift({ currentPage, totalPages });
 
     res.json({ animeList, pagination });
@@ -192,18 +245,23 @@ export const getAnimeListPage = async (req, res) => {
 
 export const getSchedule = async (req, res) => {
   try {
-    const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    const days = [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday",
+    ];
     const schedule = {};
 
     for (const day of days) {
       const url = `https://samehadaku.mba/wp-json/custom/v1/all-schedule?day=${day}`;
       const response = await fetchPage(url);
       schedule[day] = response;
-      
     }
     res.json(schedule);
-
-    
   } catch (error) {
     console.error(error);
     res.status(500).send("Error occurred while fetching data");
@@ -222,11 +280,13 @@ export const getAZList = async (req, res) => {
       const name = $(element).find(".listabj a").text().trim();
       const titles = [];
 
-      $(element).find(".listttl ul li a").each((i, el) => {
-        const title = $(el).text().trim();
-        const link = $(el).attr("href");
-        titles.push({ title, link });
-      });
+      $(element)
+        .find(".listttl ul li a")
+        .each((i, el) => {
+          const title = $(el).text().trim();
+          const link = $(el).attr("href");
+          titles.push({ title, link });
+        });
 
       azList[name] = titles;
     });
@@ -358,9 +418,11 @@ export const getSearch = async (req, res) => {
       const views = $(element).find(".metadata span").eq(2).text().trim();
       const description = $(element).find(".ttls").text().trim();
       const genres = [];
-      $(element).find(".genres .mta a").each((i, el) => {
-        genres.push($(el).text().trim());
-      });
+      $(element)
+        .find(".genres .mta a")
+        .each((i, el) => {
+          genres.push($(el).text().trim());
+        });
 
       animeList.push({
         title,
@@ -376,13 +438,19 @@ export const getSearch = async (req, res) => {
     });
 
     const pagination = [];
-    $(".pagination a.page-numbers, .pagination a.arrow_pag").each((index, element) => {
-      const pageUrl = $(element).attr("href");
-      const pageNumber = $(element).text().trim() || $(element).attr("aria-label") || "Next";
-      pagination.push({ pageUrl, pageNumber });
-    });
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
+      (index, element) => {
+        const pageUrl = $(element).attr("href");
+        const pageNumber =
+          $(element).text().trim() || $(element).attr("aria-label") || "Next";
+        pagination.push({ pageUrl, pageNumber });
+      }
+    );
     const currentPage = $(".pagination .current").text().trim();
-    const totalPages = $(".pagination span").first().text().match(/Page \d+ of (\d+)/)[1];
+    const totalPages = $(".pagination span")
+      .first()
+      .text()
+      .match(/Page \d+ of (\d+)/)[1];
     pagination.unshift({ currentPage, totalPages });
 
     res.json({ animeList, pagination });
@@ -411,9 +479,11 @@ export const getSearchPage = async (req, res) => {
       const views = $(element).find(".metadata span").eq(2).text().trim();
       const description = $(element).find(".ttls").text().trim();
       const genres = [];
-      $(element).find(".genres .mta a").each((i, el) => {
-        genres.push($(el).text().trim());
-      });
+      $(element)
+        .find(".genres .mta a")
+        .each((i, el) => {
+          genres.push($(el).text().trim());
+        });
 
       animeList.push({
         title,
@@ -429,13 +499,19 @@ export const getSearchPage = async (req, res) => {
     });
 
     const pagination = [];
-    $(".pagination a.page-numbers, .pagination a.arrow_pag").each((index, element) => {
-      const pageUrl = $(element).attr("href");
-      const pageNumber = $(element).text().trim() || $(element).attr("aria-label") || "Next";
-      pagination.push({ pageUrl, pageNumber });
-    });
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
+      (index, element) => {
+        const pageUrl = $(element).attr("href");
+        const pageNumber =
+          $(element).text().trim() || $(element).attr("aria-label") || "Next";
+        pagination.push({ pageUrl, pageNumber });
+      }
+    );
     const currentPage = $(".pagination .current").text().trim();
-    const totalPages = $(".pagination span").first().text().match(/Page \d+ of (\d+)/)[1];
+    const totalPages = $(".pagination span")
+      .first()
+      .text()
+      .match(/Page \d+ of (\d+)/)[1];
     pagination.unshift({ currentPage, totalPages });
 
     res.json({ animeList, pagination });
@@ -509,32 +585,96 @@ export const getAnimeDetail = async (req, res) => {
 
 export const getEpisode = async (req, res) => {
   const { episodeId } = req.params;
-  const url = `https://hianime.to/watch/${episodeId}`;
+  const url = `https://samehadaku.mba/${episodeId}`;
+  const originUrl = "https://samehadaku.mba";
 
   try {
     const html = await fetchPage(url);
     const $ = load(html);
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const videoSrc = $("#player_embed iframe").attr("src");
 
-    const videoSrc = $("video.jw-video").attr("src");
+    const downloadLinks = [];
+    $(".download-eps ul li").each((index, element) => {
+      const quality = $(element).find("strong").text().trim();
+      const links = [];
+      $(element)
+        .find("span a")
+        .each((i, el) => {
+          const link = $(el).attr("href");
+          const provider = $(el).text().trim();
+          links.push({ provider, link });
+        });
+      downloadLinks.push({ quality, links });
+    });
 
-    const episodes = [];
-    $(".ss-list .ssl-item").each((index, element) => {
-      const title = $(element).find(".ep-name").text().trim();
-      const episodeLink = "https://hianime.to" + $(element).attr("href");
-      const episodeNumber = $(element).data("number");
-
-      episodes.push({
-        title,
+    const title = $(".entry-title[itemprop='name']").text().trim();
+    const description = $(".entry-content[itemprop='description']")
+      .text()
+      .trim();
+    const episodeNumber = $(".sbdbti .epx span[itemprop='episodeNumber']")
+      .text()
+      .trim();
+    const postedTime = $(".sbdbti .time-post").text().trim();
+    const relatedEpisodes = [];
+    $(".lstepsiode ul li").each((index, element) => {
+      const episodeTitle = $(element).find(".epsleft .lchx a").text().trim();
+      const episodeLink = $(element).find(".epsleft .lchx a").attr("href");
+      const episodeImage = $(element).find(".epsright img").attr("src");
+      const episodeDate = $(element).find(".epsleft .date").text().trim();
+      relatedEpisodes.push({
+        episodeTitle,
         episodeLink,
-        episodeNumber,
+        episodeImage,
+        episodeDate,
       });
     });
 
+    const previousEpisode = $(".naveps .nvs a").first().attr("href");
+    const allEpisode = $(".naveps .nvsc a").attr("href");
+    const nextEpisode = $(".naveps .nvs a").last().attr("href");
+
+    const el = $(".east_player_option").first();
+    const postData = el.attr("data-post");
+    const numeData = el.attr("data-nume");
+    const typeData = el.attr("data-type");
+    
+    let defaultIframe = "";
+    try {
+      const response = await postPage(`${originUrl}/wp-admin/admin-ajax.php`, 
+        new URLSearchParams({
+          action: "player_ajax",
+          post: postData,
+          nume: numeData,
+          type: typeData,
+        }), 
+        {
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          responseType: "text",
+        }
+      );
+      const extractIframeSrc = (html) => {
+        const match = html.match(/<iframe[^>]+src="([^"]+)"/i);
+        return match ? match[1].trim() : null;
+      };
+      
+      defaultIframe = extractIframeSrc(response);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+    
+
     res.json({
-      videoSrc,
-      episodes,
+      title,
+      defaultIframe, 
+      description,
+      episodeNumber,
+      postedTime,
+      previousEpisode,
+      allEpisode,
+      nextEpisode,
+      relatedEpisodes,
+      downloadLinks,
     });
   } catch (error) {
     console.error(error);
