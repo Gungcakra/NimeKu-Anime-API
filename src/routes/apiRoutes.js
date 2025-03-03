@@ -4,6 +4,7 @@ import {
   getNewPage,
   getAnimeList,
   getAnimeListPage,
+  getMovie,
   getSchedule,
   getGenres,
   getAnimeByGenre,
@@ -22,6 +23,7 @@ router.get("/new", getNew);
 router.get("/new/page/:pageNumber", getNewPage);
 router.get("/anime", getAnimeList);
 router.get("/anime/page/:pageNumber", getAnimeListPage);
+router.get("/movie", getMovie);
 router.get("/schedule", getSchedule);
 router.get("/azlist", getAZList);
 router.get("/genres", getGenres);

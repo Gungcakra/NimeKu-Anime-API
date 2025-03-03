@@ -244,6 +244,65 @@ export const getAnimeListPage = async (req, res) => {
   }
 };
 
+export const getMovie = async (req, res) => {
+  try {
+    const url = "https://samehadaku.mba/anime-movie/";
+    const html = await fetchPage(url);
+    const $ = load(html);
+
+    const animeList = [];
+    $(".animepost").each((index, element) => {
+      const title = $(element).find(".title h2").text().trim();
+      const link = $(element).find("a").attr("href");
+      const imageSrc = $(element).find("img").attr("src");
+      const type = $(element).find(".type").first().text().trim();
+      const score = $(element).find(".score").text().trim();
+      const status = $(element).find(".data .type").text().trim();
+      const views = $(element).find(".metadata span").eq(2).text().trim();
+      const description = $(element).find(".ttls").text().trim();
+      const genres = [];
+      $(element)
+        .find(".genres .mta a")
+        .each((i, el) => {
+          genres.push($(el).text().trim());
+        });
+
+      animeList.push({
+        title,
+        link,
+        imageSrc,
+        type,
+        score,
+        status,
+        views,
+        description,
+        genres,
+      });
+    });
+
+    const pagination = [];
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
+      (index, element) => {
+      const pageUrl = $(element).attr("href");
+      const pageNumber =
+        $(element).text().trim() || $(element).attr("aria-label") || "Next";
+      pagination.push({ pageUrl, pageNumber });
+      }
+    );
+    const currentPage = $(".pagination .current").text().trim();
+    const totalPages = $(".pagination span")
+      .first()
+      .text()
+      .match(/Page \d+ of (\d+)/)[1];
+    pagination.unshift({ currentPage, totalPages });
+
+    res.json({ animeList, pagination });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error occurred while scraping data");
+  }
+};
+
 export const getSchedule = async (req, res) => {
   try {
     const days = [
@@ -308,7 +367,9 @@ export const getGenres = async (req, res) => {
     const genreList = [];
     const genreElements = $(".filter_act.genres .tax_fil").toArray();
     genreElements.forEach((genreElement) => {
-      const oriUrl = `https://samehadaku.mba/genre/${$(genreElement).find("input").attr("value")}`;
+      const oriUrl = `https://samehadaku.mba/genre/${$(genreElement)
+        .find("input")
+        .attr("value")}`;
       const title = $(genreElement).text().trim();
       const url = oriUrl;
       const genreId = oriUrl.split("/").pop();
@@ -435,7 +496,6 @@ export const getAnimeByGenrePage = async (req, res) => {
     res.status(500).json({ message: "Error fetching data" });
   }
 };
-
 
 export const getSearch = async (req, res) => {
   const { keyword } = req.params;
@@ -670,20 +730,22 @@ export const getEpisode = async (req, res) => {
     const dataDetail = {
       title: $(".entry-title[itemprop='partOfSeries']").text().trim(),
       imageSrc: $(".thumb img").attr("src"),
-      description: $(".entry-content.entry-content-single[itemprop='description']").text().trim(),
+      description: $(
+        ".entry-content.entry-content-single[itemprop='description']"
+      )
+        .text()
+        .trim(),
       relatedSeason: [],
       genres: [],
     };
-    
-    
+
     $(".entry-content.entry-content-single ol li a").each((index, element) => {
       dataDetail.relatedSeason.push({
         name: $(element).text().trim(),
         url: $(element).attr("href"),
       });
     });
-    
-    
+
     $(".genre-info a").each((index, element) => {
       dataDetail.genres.push({
         name: $(element).text().trim(),
