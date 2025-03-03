@@ -125,66 +125,8 @@ export const getNewPage = async (req, res) => {
   }
 };
 
+
 export const getAnimeList = async (req, res) => {
-  try {
-    const url = `https://samehadaku.mba/daftar-anime-2/`;
-    const html = await fetchPage(url);
-    const $ = load(html);
-
-    const animeList = [];
-    $(".animepost").each((index, element) => {
-      const title = $(element).find(".title h2").text().trim();
-      const link = $(element).find("a").attr("href");
-      const imageSrc = $(element).find("img").attr("src");
-      const type = $(element).find(".type").first().text().trim();
-      const score = $(element).find(".score").text().trim();
-      const status = $(element).find(".data .type").text().trim();
-      const views = $(element).find(".metadata span").eq(2).text().trim();
-      const description = $(element).find(".ttls").text().trim();
-      const genres = [];
-      $(element)
-        .find(".genres .mta a")
-        .each((i, el) => {
-          genres.push($(el).text().trim());
-        });
-
-      animeList.push({
-        title,
-        link,
-        imageSrc,
-        type,
-        score,
-        status,
-        views,
-        description,
-        genres,
-      });
-    });
-
-    const pagination = [];
-    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
-      (index, element) => {
-        const pageUrl = $(element).attr("href");
-        const pageNumber =
-          $(element).text().trim() || $(element).attr("aria-label") || "Next";
-        pagination.push({ pageUrl, pageNumber });
-      }
-    );
-    const currentPage = $(".pagination .current").text().trim();
-    const totalPages = $(".pagination span")
-      .first()
-      .text()
-      .match(/Page \d+ of (\d+)/)[1];
-    pagination.unshift({ currentPage, totalPages });
-
-    res.json({ animeList, pagination });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error occurred while scraping data");
-  }
-};
-
-export const getAnimeListPage = async (req, res) => {
   const { pageNumber } = req.params;
   try {
     const url = `https://samehadaku.mba/daftar-anime-2/page/${pageNumber}/`;
@@ -245,8 +187,69 @@ export const getAnimeListPage = async (req, res) => {
 };
 
 export const getMovie = async (req, res) => {
+  const { pageNumber } = req.params;
   try {
-    const url = "https://samehadaku.mba/anime-movie/";
+    const url = `https://samehadaku.mba/anime-movie/page/${pageNumber}`;
+    const html = await fetchPage(url);
+    const $ = load(html);
+
+    const animeList = [];
+    $(".animepost").each((index, element) => {
+      const title = $(element).find(".title h2").text().trim();
+      const link = $(element).find("a").attr("href");
+      const imageSrc = $(element).find("img").attr("src");
+      const type = $(element).find(".type").first().text().trim();
+      const score = $(element).find(".score").text().trim();
+      const status = $(element).find(".data .type").text().trim();
+      const views = $(element).find(".metadata span").eq(2).text().trim();
+      const description = $(element).find(".ttls").text().trim();
+      const genres = [];
+      $(element)
+        .find(".genres .mta a")
+        .each((i, el) => {
+          genres.push($(el).text().trim());
+        });
+
+      animeList.push({
+        title,
+        link,
+        imageSrc,
+        type,
+        score,
+        status,
+        views,
+        description,
+        genres,
+      });
+    });
+
+    const pagination = [];
+    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
+      (index, element) => {
+      const pageUrl = $(element).attr("href");
+      const pageNumber =
+        $(element).text().trim() || $(element).attr("aria-label") || "Next";
+      pagination.push({ pageUrl, pageNumber });
+      }
+    );
+    const currentPage = $(".pagination .current").text().trim();
+    const totalPages = $(".pagination span")
+      .first()
+      .text()
+      .match(/Page \d+ of (\d+)/)[1];
+    pagination.unshift({ currentPage, totalPages });
+
+    res.json({ animeList, pagination });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error occurred while scraping data");
+  }
+};
+
+export const getPopular = async (req, res) => {
+  const { page } = req.params;
+  try {
+    const url = `https://samehadaku.mba/daftar-anime-2/page/${page}/?order=popular`;
     const html = await fetchPage(url);
     const $ = load(html);
 
@@ -391,59 +394,6 @@ export const getGenres = async (req, res) => {
 
 export const getAnimeByGenre = async (req, res) => {
   const { genreId } = req.params;
-  const url = `https://samehadaku.mba/genre/${genreId}`;
-
-  try {
-    const html = await fetchPage(url);
-    const $ = load(html);
-    const seriesList = [];
-
-    $("article.animpost").each((index, element) => {
-      const series = {};
-      const animposx = $(element).find(".animposx");
-
-      series.title = animposx.find("a").attr("title");
-      series.url = animposx.find("a").attr("href");
-      series.image = animposx.find("img").attr("src");
-      series.type = animposx.find(".type").first().text().trim();
-      series.score = animposx.find(".score").text().trim();
-      series.status = animposx.find(".data .type").text().trim();
-      series.views = $(element).find(".metadata span").eq(2).text().trim();
-      series.description = $(element).find(".ttls").text().trim();
-      series.genres = [];
-      $(element)
-        .find(".genres .mta a")
-        .each((i, el) => {
-          series.genres.push($(el).text().trim());
-        });
-
-      seriesList.push(series);
-    });
-
-    const pagination = [];
-    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
-      (index, element) => {
-        const pageUrl = $(element).attr("href");
-        const pageNumber =
-          $(element).text().trim() || $(element).attr("aria-label") || "Next";
-        pagination.push({ pageUrl, pageNumber });
-      }
-    );
-    const currentPage = $(".pagination .current").text().trim();
-    const totalPages = $(".pagination span")
-      .first()
-      .text()
-      .match(/Page \d+ of (\d+)/)[1];
-    pagination.unshift({ currentPage, totalPages });
-
-    res.json({ seriesList, pagination });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching data" });
-  }
-};
-export const getAnimeByGenrePage = async (req, res) => {
-  const { genreId } = req.params;
   const { pageNumber } = req.params;
   const url = `https://samehadaku.mba/genre/${genreId}/page/${pageNumber}`;
 
@@ -498,66 +448,6 @@ export const getAnimeByGenrePage = async (req, res) => {
 };
 
 export const getSearch = async (req, res) => {
-  const { keyword } = req.params;
-  try {
-    const url = `https://samehadaku.mba/?s=${keyword}`;
-    const html = await fetchPage(url);
-    const $ = load(html);
-
-    const animeList = [];
-    $(".animepost").each((index, element) => {
-      const title = $(element).find(".title h2").text().trim();
-      const link = $(element).find("a").attr("href");
-      const imageSrc = $(element).find("img").attr("src");
-      const type = $(element).find(".type").first().text().trim();
-      const score = $(element).find(".score").text().trim();
-      const status = $(element).find(".data .type").text().trim();
-      const views = $(element).find(".metadata span").eq(2).text().trim();
-      const description = $(element).find(".ttls").text().trim();
-      const genres = [];
-      $(element)
-        .find(".genres .mta a")
-        .each((i, el) => {
-          genres.push($(el).text().trim());
-        });
-
-      animeList.push({
-        title,
-        link,
-        imageSrc,
-        type,
-        score,
-        status,
-        views,
-        description,
-        genres,
-      });
-    });
-
-    const pagination = [];
-    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
-      (index, element) => {
-        const pageUrl = $(element).attr("href");
-        const pageNumber =
-          $(element).text().trim() || $(element).attr("aria-label") || "Next";
-        pagination.push({ pageUrl, pageNumber });
-      }
-    );
-    const currentPage = $(".pagination .current").text().trim();
-    const totalPages = $(".pagination span")
-      .first()
-      .text()
-      .match(/Page \d+ of (\d+)/)[1];
-    pagination.unshift({ currentPage, totalPages });
-
-    res.json({ animeList, pagination });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error occurred while scraping data");
-  }
-};
-
-export const getSearchPage = async (req, res) => {
   const { keyword } = req.params;
   const { pageNumber } = req.params;
   try {
