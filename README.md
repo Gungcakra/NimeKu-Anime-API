@@ -1,0 +1,196 @@
+<!-- ![Preview](panel.webp) -->
+
+# Nimeku API
+Rest API Anime Subtitle Indonesia
+
+## Source
+https://samehadaku.mba
+
+## Fitur
+- **New Anime**
+- **Anime List**
+- **Movie**
+- **Schedule**
+- **A-Z List Anime**
+- **Genre List**
+- **Anime by Genre**
+- **Anime Search**
+- **Anime Details**
+- **Episode Details**
+- **Stream Link**
+
+
+## TechStack
+
+- **Express.js**
+- **Node.js**
+- **Axios**
+- **Cheerio**
+- **Vercel**
+
+
+## Installasi
+```bash
+# Clone repositori
+git clone https://github.com/Gungcakra/nimeku-anime-api.git
+
+# Masuk ke folder proyek
+cd nimeku-anime-api
+
+# Install dependensi
+npm install
+
+# Jalankan server
+npm start
+
+```
+
+
+
+## Contoh Response JSON
+  ```json
+  {
+  "title": "Boku no Hero Academia the Movie 4",
+  "link": "https://samehadaku.mba/anime/boku-no-hero-academia-the-movie-4/",
+  "imageSrc": "https://samehadaku.mba/wp-content/uploads/2025/02/143549.jpg",
+  "type": "Movie",
+  "score": "7.5",
+  "status": "Completed",
+  "views": "1304 Views",
+  "description": "Movie ke 4 dari Boku no Hero Academia Tonton juga",
+  "genres": [
+    "Action",
+    "School",
+    "Super Power"
+  ]
+  }
+  ```
+## Routes
+URL Utama API:
+
+https://nimeku.vercel.app/api/$endpoint
+
+Ganti `$endpoint` dengan list endpoint ini.
+
+## Endpoint List
+
+### 1. New Anime
+- **GET** `/new`
+  
+  Get list anime terbaru.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/new`
+  
+
+### 2. New Anime with Page
+- **GET** `/new/page/:pageNumber`
+  
+  Get list anime terbaru dengan halaman.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/new/page/2`
+
+### 3. Anime List
+- **GET** `/anime`
+  
+  Get list semua anime.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/anime`
+
+### 4. Anime List with Page
+- **GET** `/anime/page/:pageNumber`
+  
+  Get list semua anime dengan halaman.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/anime/page/2`
+
+### 5. Movie
+- **GET** `/movie`
+  
+  Get list movie anime.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/movie`
+
+### 6. Schedule
+- **GET** `/schedule`
+  
+  Get jadwal anime.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/schedule`
+
+### 7. A-Z List Anime
+- **GET** `/azlist`
+  
+  Get A-Z list anime.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/azlist`
+
+### 8. Genre List
+- **GET** `/genres`
+  
+  Get list genre.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/genres`
+
+### 9. Anime by Genre
+- **GET** `/genre/:genreId`
+  
+  Get list anime sesuai genre.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/genre/action`
+
+### 10. Anime by Genre with Page
+- **GET** `/genre/:genreId/page/:pageNumber`
+  
+  Get list anime sesuai genre dan halaman.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/genre/action/page/2`
+
+### 11. Anime Search
+- **GET** `/search/:keyword`
+  
+  Get list anime sesuai keyword.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/search/attack%20on%20titan`
+
+### 12. Anime Search with Page
+- **GET** `/search/:keyword/page/:pageNumber`
+  
+  Get list anime sesuai keyword dan halaman.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/search/attack%20on%20titan/page/2`
+
+### 13. Anime Details
+- **GET** `/detail/:animeId`
+  
+  Get detail anime sesuai `animeId`.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/detail/attack-on-titan`
+
+### 14. Episode Details
+- **GET** `/watch/:episodeId`
+  
+  Get detail episode anime sesuai `episodeId`.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/watch/attack-on-titan-episode-1`
+
+### 15. Stream Link
+- **GET** `/stream/:streamId`
+  
+  Get link streaming sesuai `streamId`.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/stream/attack-on-titan-episode-1`
