@@ -10,6 +10,7 @@ https://samehadaku.mba
 - **New Anime**
 - **Anime List**
 - **Movie**
+- **Popular**
 - **Schedule**
 - **A-Z List Anime**
 - **Genre List**
@@ -19,7 +20,6 @@ https://samehadaku.mba
 - **Episode Details**
 - **Stream Link**
 
-
 ## TechStack
 
 - **Express.js**
@@ -27,7 +27,6 @@ https://samehadaku.mba
 - **Axios**
 - **Cheerio**
 - **Vercel**
-
 
 ## Installasi
 ```bash
@@ -42,10 +41,7 @@ npm install
 
 # Jalankan server
 npm start
-
 ```
-
-
 
 ## Contoh Response JSON
   ```json
@@ -65,6 +61,7 @@ npm start
   ]
   }
   ```
+
 ## Routes
 URL Utama API:
 
@@ -75,47 +72,38 @@ Ganti `$endpoint` dengan list endpoint ini.
 ## Endpoint List
 
 ### 1. New Anime
-- **GET** `/new`
+- **GET** `/new/page/:pageNumber`
   
   Get list anime terbaru.
   
   **Example:**  
-  `https://nimeku.vercel.app/api/new`
-  
-
-### 2. New Anime with Page
-- **GET** `/new/page/:pageNumber`
-  
-  Get list anime terbaru dengan halaman.
-  
-  **Example:**  
   `https://nimeku.vercel.app/api/new/page/2`
 
-### 3. Anime List
-- **GET** `/anime`
+### 2. Anime List
+- **GET** `/anime/page/:pageNumber`
   
   Get list semua anime.
   
   **Example:**  
-  `https://nimeku.vercel.app/api/anime`
-
-### 4. Anime List with Page
-- **GET** `/anime/page/:pageNumber`
-  
-  Get list semua anime dengan halaman.
-  
-  **Example:**  
   `https://nimeku.vercel.app/api/anime/page/2`
 
-### 5. Movie
-- **GET** `/movie`
+### 3. Movie
+- **GET** `/movie/page/:pageNumber`
   
   Get list movie anime.
   
   **Example:**  
-  `https://nimeku.vercel.app/api/movie`
+  `https://nimeku.vercel.app/api/movie/page/2`
 
-### 6. Schedule
+### 4. Popular Anime
+- **GET** `/popular/page/:pageNumber`
+  
+  Get list anime populer.
+  
+  **Example:**  
+  `https://nimeku.vercel.app/api/popular/page/2`
+
+### 5. Schedule
 - **GET** `/schedule`
   
   Get jadwal anime.
@@ -123,7 +111,7 @@ Ganti `$endpoint` dengan list endpoint ini.
   **Example:**  
   `https://nimeku.vercel.app/api/schedule`
 
-### 7. A-Z List Anime
+### 6. A-Z List Anime
 - **GET** `/azlist`
   
   Get A-Z list anime.
@@ -131,7 +119,7 @@ Ganti `$endpoint` dengan list endpoint ini.
   **Example:**  
   `https://nimeku.vercel.app/api/azlist`
 
-### 8. Genre List
+### 7. Genre List
 - **GET** `/genres`
   
   Get list genre.
@@ -139,7 +127,7 @@ Ganti `$endpoint` dengan list endpoint ini.
   **Example:**  
   `https://nimeku.vercel.app/api/genres`
 
-### 9. Anime by Genre
+### 8. Anime by Genre
 - **GET** `/genre/:genreId`
   
   Get list anime sesuai genre.
@@ -147,7 +135,7 @@ Ganti `$endpoint` dengan list endpoint ini.
   **Example:**  
   `https://nimeku.vercel.app/api/genre/action`
 
-### 10. Anime by Genre with Page
+### 9. Anime by Genre
 - **GET** `/genre/:genreId/page/:pageNumber`
   
   Get list anime sesuai genre dan halaman.
@@ -155,7 +143,7 @@ Ganti `$endpoint` dengan list endpoint ini.
   **Example:**  
   `https://nimeku.vercel.app/api/genre/action/page/2`
 
-### 11. Anime Search
+### 10. Anime Search
 - **GET** `/search/:keyword`
   
   Get list anime sesuai keyword.
@@ -163,7 +151,7 @@ Ganti `$endpoint` dengan list endpoint ini.
   **Example:**  
   `https://nimeku.vercel.app/api/search/attack%20on%20titan`
 
-### 12. Anime Search with Page
+### 11. Anime Search
 - **GET** `/search/:keyword/page/:pageNumber`
   
   Get list anime sesuai keyword dan halaman.
@@ -171,7 +159,7 @@ Ganti `$endpoint` dengan list endpoint ini.
   **Example:**  
   `https://nimeku.vercel.app/api/search/attack%20on%20titan/page/2`
 
-### 13. Anime Details
+### 12. Anime Details
 - **GET** `/detail/:animeId`
   
   Get detail anime sesuai `animeId`.
@@ -179,7 +167,7 @@ Ganti `$endpoint` dengan list endpoint ini.
   **Example:**  
   `https://nimeku.vercel.app/api/detail/attack-on-titan`
 
-### 14. Episode Details
+### 13. Episode Details
 - **GET** `/watch/:episodeId`
   
   Get detail episode anime sesuai `episodeId`.
@@ -187,7 +175,7 @@ Ganti `$endpoint` dengan list endpoint ini.
   **Example:**  
   `https://nimeku.vercel.app/api/watch/attack-on-titan-episode-1`
 
-### 15. Stream Link
+### 14. Stream Link
 - **GET** `/stream/:streamId`
   
   Get link streaming sesuai `streamId`.
