@@ -2,68 +2,8 @@ import { load } from "cheerio";
 import { fetchPage, postPage } from "../utils/fetchPage.js";
 import { extractIframeSrc } from "../utils/helper.js";
 
+
 export const getNew = async (req, res) => {
-  try {
-    const url = "https://samehadaku.mba/anime-terbaru/";
-    const html = await fetchPage(url);
-    const $ = load(html);
-
-    const newUpdate = [];
-    $(
-      'li[itemscope="itemscope"][itemtype="http://schema.org/CreativeWork"]'
-    ).each((index, element) => {
-      const title = $(element).find(".entry-title a").text().trim();
-      const link = $(element).find(".entry-title a").attr("href");
-      const imageSrc = $(element).find(".thumb img").attr("src");
-      const episode = $(element)
-        .find('.dtla span b:contains("Episode")')
-        .next("author")
-        .text()
-        .trim();
-      const postedBy = $(element)
-        .find('.dtla span[itemprop="author"] author')
-        .text()
-        .trim();
-      const releasedOn = $(element)
-        .find('.dtla span:contains("Released on")')
-        .text()
-        .replace("Released on:", "")
-        .trim();
-
-      newUpdate.push({
-        title,
-        link,
-        imageSrc,
-        episode,
-        postedBy,
-        releasedOn,
-      });
-    });
-
-    const pagination = [];
-    $(".pagination a.page-numbers, .pagination a.arrow_pag").each(
-      (index, element) => {
-        const pageUrl = $(element).attr("href");
-        const pageNumber =
-          $(element).text().trim() || $(element).attr("aria-label") || "Next";
-        pagination.push({ pageUrl, pageNumber });
-      }
-    );
-    const currentPage = $(".pagination .current").text().trim();
-    const totalPages = $(".pagination span")
-      .first()
-      .text()
-      .match(/Page \d+ of (\d+)/)[1];
-    pagination.unshift({ currentPage, totalPages });
-
-    res.json({ newUpdate, pagination });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error occurred while scraping data");
-  }
-};
-
-export const getNewPage = async (req, res) => {
   const { pageNumber } = req.params;
   try {
     const url = `https://samehadaku.mba/anime-terbaru/page/${pageNumber}`;

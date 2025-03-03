@@ -1,7 +1,6 @@
 import express from "express";
 import {
   getNew,
-  getNewPage,
   getAnimeList,
   getMovie,
   getPopular,
@@ -17,8 +16,7 @@ import {
 
 const router = express.Router();
 
-router.get("/new", getNew);
-router.get("/new/page/:pageNumber", getNewPage);
+router.get("/new/page/:pageNumber", getNew);
 router.get("/anime/page/:pageNumber", getAnimeList);
 router.get("/movie/page/:pageNumber", getMovie);
 router.get("/popular/page/:pageNumber", getPopular);
